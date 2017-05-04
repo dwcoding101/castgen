@@ -6,8 +6,8 @@
  * user guide available at https://docs.gradle.org/3.5/userguide/java_library_plugin.html
  */
 
-// Apply the java-library plugin to add support for Java Library
-apply plugin: 'java-library'
+// Apply the java plugin
+apply plugin: 'java'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -25,5 +25,9 @@ dependencies {
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+
+    // Used by ogm
+    compile 'org.neo4j:neo4j-ogm-core:2.1.1'
+    runtime 'org.neo4j:neo4j-ogm-bolt-driver:2.1.1' // Only add if you're using the Bolt driver
 }
 
