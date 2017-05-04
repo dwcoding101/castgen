@@ -1,5 +1,7 @@
 package org.gen.cast.stat;
 
+import org.gen.random.Dice;
+
 /**
  * Created by Daniel on 04/05/2017.
  */
@@ -18,6 +20,9 @@ public class Stat {
     int value;
 
     public long generateValue() {
-        return 0;
+        if (!generatedBy.isEmpty()){
+            value = (int)Dice.roll(generatedBy);
+        }
+        return value;
     }
 }
