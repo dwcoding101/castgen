@@ -27,7 +27,7 @@ public class Dice {
         int sides = 6;
 
         while (matcher.find()) {
-            System.out.println("Full match: " + matcher.group(0));
+          //  System.out.println("Full match: " + matcher.group(0));
             String diceRoll = matcher.group(0);
 
             if(!matcher.group(1).equals("")) {

@@ -5,6 +5,6 @@ package org.gen;
  */
 public class CastGen {
     public static void main(String[] args) {
-        
+
     }
 }
