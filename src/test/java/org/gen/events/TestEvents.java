@@ -7,9 +7,6 @@ public class TestEvents {
     public static void main(String[] args) {
         Events events = new Events();
 
-        events.loadCalendar();
-
-
         events.addNpcLife(18,46);
 
         EventsImpl events1 = new EventsImpl();

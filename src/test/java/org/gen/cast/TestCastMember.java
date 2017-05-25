@@ -1,5 +1,8 @@
 package org.gen.cast;
 
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.time.StopWatch;
 import org.gen.cast.gender.Genders;
 import org.gen.cast.gender.Sex;
 import org.gen.cast.name.Names;
@@ -8,12 +11,21 @@ import org.gen.cast.race.Race;
 import org.gen.cast.race.RaceImpl;
 import org.gen.cast.stat.Stat;
 import org.gen.cast.stat.Stats;
-import org.gen.dates.CalendarImpl;
+import org.gen.dates.*;
+import org.gen.factory.Neo4jSessionFactory;
+import org.gen.random.Dice;
+import org.neo4j.ogm.session.Session;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Daniel on 04/05/2017.
  */
 public class TestCastMember {
+
+
 
     public static void main(String[] args) {
 
@@ -22,7 +34,45 @@ public class TestCastMember {
 //       // Transaction tx = session.beginTransaction();
 //
 
-        boolean setupDataBaseForNPC= false;
+
+        boolean createOrLoad =true;
+        boolean setupDataBaseForNPC= true;
+        boolean createcast =true;
+        boolean eventGenerator = true;
+        boolean load_via_uuid = false;
+
+        CalendarImpl calendarImpl = new CalendarImpl();
+        if(createOrLoad) {
+
+            Calendar calendar = Calendar.getIntance();
+
+            calendar.days.addDayOfTheWeek(new Day(0L, "Wellentag"));
+            calendar.days.addDayOfTheWeek(new Day(1L, "Aubentag"));
+            calendar.days.addDayOfTheWeek(new Day(2L, "Marktag"));
+            calendar.days.addDayOfTheWeek(new Day(3L, "Backertag"));
+            calendar.days.addDayOfTheWeek(new Day(4L, "Bezahltag"));
+            calendar.days.addDayOfTheWeek(new Day(5L, "Konistag"));
+            calendar.days.addDayOfTheWeek(new Day(6L, "Angestag"));
+            calendar.days.addDayOfTheWeek(new Day(7L, "Festag"));
+
+            calendar.addMonth(new Month(0L, "Nachexen", 32L));
+            calendar.addMonth(new Month(1L, "Jahrdrung", 33L));
+            calendar.addMonth(new Month(2L, "Pflugzeit", 33L));
+            calendar.addMonth(new Month(3L, "Sigmarzeit", 33L));
+            calendar.addMonth(new Month(4L, "Sommerzeit", 33L));
+            calendar.addMonth(new Month(5L, "Vorgeheim", 33L));
+            calendar.addMonth(new Month(6L, "Nachgeheim", 32L));
+            calendar.addMonth(new Month(7L, "Erntezeit", 33L));
+            calendar.addMonth(new Month(8L, "Brauzeit", 33L));
+            calendar.addMonth(new Month(9L, "Kaldezeit", 33L));
+            calendar.addMonth(new Month(10L, "Ulriczeit", 33L));
+            calendar.addMonth(new Month(11L, "Vorhexen", 33L));
+
+            calendarImpl.createOrUpdate(calendar);
+
+        }
+
+
         if (setupDataBaseForNPC) {
             RaceImpl raceImpl = new RaceImpl();
 
@@ -100,58 +150,83 @@ public class TestCastMember {
 
             raceImpl.createOrUpdate(race);
         }
-        else {
-            CastMember castMember = new CastMember("Human");
 
-            CastMemberImpl castMember1 = new CastMemberImpl();
+        if (createcast) {
 
-            castMember1.createOrUpdate(castMember);
+                int number_of_npc = 100;
 
-            System.out.println(castMember.toFormatedString());
+                for (int i = 0; i < number_of_npc; i++) {
+                    CastMember castMember = new CastMember("Human");
+                    CastMemberImpl castMember1 = new CastMemberImpl();
+                    castMember1.createOrUpdate(castMember);
+                    System.out.println(castMember.toFormatedString());
+                }
+            }
+
+
+
+        // ramdon cast picker
+        if(eventGenerator){
+            int numberOfEvents = 150;
+
+
+            // Load all NPC
+            Session session = Neo4jSessionFactory.getInstance().getNeo4jSessionFactory();
+            Iterable<CastMember> npcIterator = session.query(CastMember.class,"MATCH n=(r:NPC)-[*1..5]->() return n as NPC", Collections.EMPTY_MAP );
+
+            Calendar calendar = Calendar.getIntance();
+
+            //convert to List
+            List<CastMember> npcList = Lists.newArrayList(npcIterator);
+
+            Stopwatch sw = Stopwatch.createUnstarted();
+
+            for (int i = 0; i < numberOfEvents; i++){
+                sw.start();
+                int numberInMeeting = (int) Dice.roll("1D10+1");
+                int years = (int) Dice.roll("1D6");
+                int days = (int) Dice.roll("1D394");
+                DateTime eventDateTime = calendar.yearsDaysInThePast(years,days);
+                List<CastMember> meetingMembers = new ArrayList<>();
+                int size =  npcList.size() -1;
+                for(int member=0; member < numberInMeeting; member++ ){
+                    int npcNumber = (int) Dice.roll("1D"+size);
+                    CastMember npc = npcList.get(npcNumber);
+                    if(npc.isAlive(eventDateTime)) {
+                        // make sure that the member is not already in the list
+                        if(meetingMembers.contains(npc)) {
+                            member--;
+                        }
+                        meetingMembers.add(npc);
+                    }
+                    else {
+                        member--;
+                    }
+                }
+                sw.stop();
+                System.out.println("Stopwatch before: " + sw);
+                sw.reset();
+                sw.start();
+
+                CastMember castMember = meetingMembers.get(0);
+                castMember.getLifeEvents().addMeeting(meetingMembers,years,days);
+                sw.stop();
+                System.out.println("Stopwatch after: " + sw);
+            }
+            //
+
+
+
         }
-//        Race testRace = session.load(Race.class,96);
 
-  //      System.out.println("Race name:= " + testRace.getName());
+        if (load_via_uuid) {
+            CastMemberImpl castMemberl = new CastMemberImpl();
 
+            CastMember castMember = castMemberl.find("73492fd7-d8a4-4c71-9b07-a356ebebb2c2");
 
-       // long current = race.getId();
+            System.out.println(castMember.getName());
+        }
 
-//        try {
-//                RaceImpl raceImpl = new RaceImpl();
-//              //  raceImpl.createOrUpdate(race);
-//
-//                Iterable<Race> iterableRace = raceImpl.findAll();
-//
-//                iterableRace.forEach((raceIt)->{
-//                System.out.println("Races:= " + raceIt.getName());
-//
-//                Sex sex =raceIt.getGender().pickRandomSex();
-//              //  System.out.println("Genders of race:= " + raceIt.nowManyGenders());
-//              //  System.out.println("Genders of race:= " + raceIt.getGender().howManySexes());
-//                System.out.println("Sex:= " + sex.getType());
-//                System.out.println("firstName:= " + sex.getNames().pickRandomFirstName().getName());
-//                System.out.println("Surname:= " + raceIt.getGender().pickRandomSex().getNames().getSurnames().pickRandomSurname());
-//            });
-//
-////          raceImpl.createOrUpdate(race);
-////            Race it= raceImpl.find(Long.parseLong("10657"));
-////
-////
-////
-////            System.out.println("Races:= " + it.getName());
-////            System.out.println("firstName:= " + it.getGender().getSex("male").getNames().pickRandomFirstName().getName());
-////            System.out.println("firstName:= " + it.getGender().getSex("male").getNames().getSurnames().pickRandomSurname());
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//
-//        //tx.commit();
-//
-//
-//
-//       // tx.close();
 
 
     }

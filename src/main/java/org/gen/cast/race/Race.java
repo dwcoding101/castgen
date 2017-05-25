@@ -5,6 +5,7 @@ import org.gen.cast.gender.Genders;
 import org.gen.cast.stat.Stats;
 import org.gen.cast.stat.WithStats;
 import org.gen.cast.gender.WithGenders;
+import org.gen.service.Id;
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
@@ -19,7 +20,7 @@ import java.util.Set;
  * Created by Daniel on 04/05/2017.
  */
 @NodeEntity(label="RACE")
-public class Race {
+public class Race implements Id {
 
 
 

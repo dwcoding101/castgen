@@ -6,7 +6,7 @@ package org.gen.dates;
 public class TestSecondsToDateTime {
     public static void main(String[] args) {
 
-        Calendar calendar = new Calendar();
+        Calendar calendar = Calendar.getIntance();
 
         calendar.days.addDayOfTheWeek(new Day(0L, "Wellentag"));
         calendar.days.addDayOfTheWeek(new Day(1L, "Aubentag"));

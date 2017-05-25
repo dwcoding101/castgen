@@ -1,17 +1,43 @@
 package org.gen.dates;
 
+import org.gen.factory.Neo4jSessionFactory;
+import org.gen.service.Id;
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
+import org.neo4j.ogm.session.Session;
+
+import java.util.Collections;
 
 /**
  * Created by Daniel on 10/05/2017.
  */
 @NodeEntity(label = "CALENDAR")
-public class Calendar {
+public class Calendar implements Id {
 
+    private static Calendar calendar = new Calendar().loadedCalendar();
+
+    public static Calendar getIntance() {
+        return calendar;
+    }
     @GraphId
     private Long id;
+
+    private static Calendar loadedCalendar(){
+        Session session = Neo4jSessionFactory.getInstance().getNeo4jSessionFactory();
+        Iterable<Calendar> calendarNodes = session.query(Calendar.class,"MATCH n=(r:CALENDAR)-[*1..5]->() return n as CALENDAR", Collections.EMPTY_MAP );
+
+        if(calendarNodes.iterator().hasNext()) {
+            calendarNodes.forEach((calendarNode) -> {
+                calendar = calendarNode;
+            });
+        }
+        else {
+            calendar = new Calendar();
+        }
+
+        return calendar;
+    }
 
     Long secondsInMin = 60L;
     Long minsInHour = 60L;
@@ -28,7 +54,7 @@ public class Calendar {
         return currentDate;
     }
 
-    public Calendar() {
+    private Calendar() {
 
     }
 
@@ -48,7 +74,7 @@ public class Calendar {
     private Months months = new Months();
 
     @Relationship(type="CAN_BE", direction=Relationship.OUTGOING)
-    Days days = new Days();
+    public Days days = new Days();
 
     public long calculateDaysInAYear() {
         long dayCount = 0;
@@ -195,7 +221,13 @@ public class Calendar {
 
             double tempNewSeconds = tempSeconds - (tempYearsInSeconds + tempDaysInSeconds);
 
-            return dateFromSeconds(tempNewSeconds);
-
+            DateTime dateTime = dateFromSeconds(tempNewSeconds);
+            dateTime.processDateTime();
+            return dateTime;
         }
+
+    @Override
+    public Long getId() {
+        return this.id;
+    }
 }

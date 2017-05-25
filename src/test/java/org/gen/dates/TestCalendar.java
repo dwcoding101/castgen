@@ -13,7 +13,7 @@ public class TestCalendar {
         CalendarImpl calendarImpl = new CalendarImpl();
         if(createOrLoad) {
 
-            Calendar calendar = new Calendar();
+            Calendar calendar = Calendar.getIntance();
 
             calendar.days.addDayOfTheWeek(new Day(0L, "Wellentag"));
             calendar.days.addDayOfTheWeek(new Day(1L, "Aubentag"));

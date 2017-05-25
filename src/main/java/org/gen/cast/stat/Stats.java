@@ -143,4 +143,14 @@ public class Stats {
             addStat(new Stat(of.getEnd()));
         }
     }
+
+    public Stat getStat(String statName) {
+        Stat ret = null;
+        for (Of of : this.of) {
+            if(of.getEnd().getName().equals(statName)){
+                ret = of.getEnd();
+            }
+        }
+        return ret;
+    }
 }

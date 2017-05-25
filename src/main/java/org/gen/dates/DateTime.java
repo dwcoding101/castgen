@@ -1,5 +1,6 @@
 package org.gen.dates;
 
+import org.gen.service.Id;
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Property;
@@ -12,7 +13,7 @@ import java.util.regex.Pattern;
  * Created by Daniel on 11/05/2017.
  */
 @NodeEntity(label="TIMESTAMP")
-public class DateTime {
+public class DateTime implements Id{
     public static final long VALID = 0b1;
     public static final long CHECKED = 0b10;
 
@@ -46,7 +47,7 @@ public class DateTime {
         dateTime = this.toString();
     }
 
-    protected void processDateTime(){
+    public void processDateTime(){
 
         final String regex = "(\\d+).(\\d+).(\\d+)\\s(\\d+):(\\d+):(\\d+)\\.(\\d+)";
         final String string = "2553.11.32 23:23:59.0";
@@ -55,7 +56,7 @@ public class DateTime {
         final Matcher matcher = pattern.matcher(this.dateTime);
 
         while (matcher.find()) {
-            System.out.println("Full match: " + matcher.group(0));
+ //           System.out.println("Full match: " + matcher.group(0));
             for (int i = 1; i <= matcher.groupCount(); i++) {
                 switch (i) {
                     case 1:
@@ -121,4 +122,8 @@ public class DateTime {
         return hundreds;
     }
 
+    @Override
+    public Long getId() {
+        return id;
+    }
 }

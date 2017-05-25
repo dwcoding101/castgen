@@ -29,7 +29,7 @@ public class TestDateTime {
             DateTime loadedDateTime;
             Iterable<DateTime> dateTimes = dateTimel.findAll();
             dateTimes.forEach(dateTime2->{
-               System.out.println(dateTime2.toString());
+           //    System.out.println(dateTime2.toString());
         //       System.out.println(""+calendar.dayOfTheWeek(dateTime2));
             });
         }
