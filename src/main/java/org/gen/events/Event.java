@@ -1,6 +1,7 @@
 package org.gen.events;
 
 import org.gen.dates.DateTime;
+import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import java.util.UUID;
@@ -15,6 +16,7 @@ public class Event {
     DateTime date;
     Boolean eventActioned;
     String type;
+    @Index(unique = true)
     String uuid = UUID.randomUUID().toString();
 
 

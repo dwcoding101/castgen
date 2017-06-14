@@ -9,6 +9,7 @@ import org.gen.cast.name.Names;
 import org.gen.cast.name.Surnames;
 import org.gen.cast.race.Race;
 import org.gen.cast.race.RaceImpl;
+import org.gen.cast.relations.ProcessAllRelations;
 import org.gen.cast.stat.Stat;
 import org.gen.cast.stat.Stats;
 import org.gen.dates.*;
@@ -38,8 +39,9 @@ public class TestCastMember {
         boolean createOrLoad =true;
         boolean setupDataBaseForNPC= true;
         boolean createcast =true;
-        boolean eventGenerator = true;
+        boolean eventGenerator = false;
         boolean load_via_uuid = false;
+        boolean processRelationships = false;
 
         CalendarImpl calendarImpl = new CalendarImpl();
         if(createOrLoad) {
@@ -153,7 +155,7 @@ public class TestCastMember {
 
         if (createcast) {
 
-                int number_of_npc = 100;
+                int number_of_npc = 50;
 
                 for (int i = 0; i < number_of_npc; i++) {
                     CastMember castMember = new CastMember("Human");
@@ -167,7 +169,7 @@ public class TestCastMember {
 
         // ramdon cast picker
         if(eventGenerator){
-            int numberOfEvents = 150;
+            int numberOfEvents = 30;
 
 
             // Load all NPC
@@ -196,8 +198,10 @@ public class TestCastMember {
                         // make sure that the member is not already in the list
                         if(meetingMembers.contains(npc)) {
                             member--;
+                        } else {
+                            meetingMembers.add(npc);
                         }
-                        meetingMembers.add(npc);
+
                     }
                     else {
                         member--;
@@ -217,6 +221,12 @@ public class TestCastMember {
 
 
 
+        }
+
+        if(processRelationships) {
+            ProcessAllRelations processAllRelations = new ProcessAllRelations();
+            processAllRelations.processUnactioned();
+            processAllRelations.harmonize();
         }
 
         if (load_via_uuid) {

@@ -13,8 +13,10 @@ import org.gen.factory.Neo4jSessionFactory;
 import org.gen.random.Dice;
 import org.gen.service.Id;
 import org.neo4j.ogm.annotation.*;
+import org.neo4j.ogm.annotation.typeconversion.Convert;
 import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.transaction.Transaction;
+import org.neo4j.ogm.typeconversion.UuidStringConverter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,11 +36,16 @@ public class Events implements Id{
     @GraphId
     private Long id;
 
-    @Property
-    private String uuid = UUID.randomUUID().toString();
+    @Index(unique = true)
+    @Convert(UuidStringConverter.class)
+    private UUID uuid = UUID.randomUUID();
 
     @Transient
     Calendar calendar = Calendar.getIntance();
+
+    public UUID getUuid() {
+        return uuid;
+    }
 
     @Relationship(type = EventReaction.TYPE)
     List<EventReaction> events = new ArrayList<>();
@@ -54,11 +61,11 @@ public class Events implements Id{
       // System.out.println(event.date.toString());
     }
 
-    public void addEventYearsDaysInThePast(Event event, int reaction, int years, int days) {
+    public void addEventYearsDaysInThePast(Event event, int reaction,int interaction, int years, int days) {
 
         event.date = calendar.yearsDaysInThePast(years, days);
 
-        events.add(new EventReaction(this, reaction,event));
+        events.add(new EventReaction(this, reaction, interaction, event));
         // System.out.println(event.date.toString());
     }
 
@@ -90,13 +97,16 @@ public class Events implements Id{
             sw.start();
             System.out.println("add event to " + cast.getName());
 
-            CastMember castn = castMemberImpl.find(cast.getUuid());
-            int reaction = (int) Dice.roll("1D3");
+            CastMember castn = castMemberImpl.find(cast.getUuid().toString());
+          //  int reaction = (int) Dice.roll("1D3");
+            int interaction = (int) Dice.roll("1D3");
 
+            int reaction = (int) Math.floor((double)cast.getStat("Fel")/10);
             if(!cast.testStat("Fel","1D100")){
-                reaction = -1 * reaction;
+                interaction  = -1 * interaction;
             }
-            castn.getLifeEvents().addEventYearsDaysInThePast(meetingEvent,reaction, years, days);
+
+            castn.getLifeEvents().addEventYearsDaysInThePast(meetingEvent,reaction,interaction , years, days);
             castMemberImpl.update(castn);
 
 

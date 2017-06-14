@@ -2,6 +2,7 @@ package org.gen.cast;
 
 import org.gen.cast.gender.Sex;
 import org.gen.cast.race.Race;
+import org.gen.cast.relations.Relations;
 import org.gen.cast.stat.Of;
 import org.gen.cast.stat.Stat;
 import org.gen.cast.stat.Stats;
@@ -11,11 +12,10 @@ import org.gen.events.Events;
 import org.gen.factory.Neo4jSessionFactory;
 import org.gen.random.Dice;
 import org.gen.service.Id;
-import org.neo4j.ogm.annotation.GraphId;
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-import org.neo4j.ogm.annotation.Transient;
+import org.neo4j.ogm.annotation.*;
+import org.neo4j.ogm.annotation.typeconversion.Convert;
 import org.neo4j.ogm.session.Session;
+import org.neo4j.ogm.typeconversion.UuidStringConverter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,9 +39,14 @@ public class CastMember implements Id{
     private String gender;
     private double currentAgeYear;
 
-    private String uuid;
+    @Index(unique = true)
+    @Convert(UuidStringConverter.class)
+    private UUID uuid;
 
     private Stats stats;
+
+    @Relationship(type=Relations.NAME)
+    private Relations relations;
 
     @Relationship(type=Events.LABEL)
     private Events lifeEvents = new Events();
@@ -68,14 +73,19 @@ public class CastMember implements Id{
     Calendar calendar = Calendar.getIntance();
 
 
-    public String getUuid() {
+    public UUID getUuid() {
         return uuid;
     }
 
     public CastMember (String race) {
+
+        this.relations = new Relations();
+        this.relations.createUuid();
         this.race = race;
 
-        this.uuid = UUID.randomUUID().toString();
+
+
+        this.uuid = UUID.randomUUID();
 
         //load race details
         Session session = Neo4jSessionFactory.getInstance().getNeo4jSessionFactory();
@@ -174,6 +184,12 @@ public class CastMember implements Id{
         else {
             return false;
         }
+    }
+
+    public int getStat(String statStr) {
+        Stat stat = stats.getStat(statStr);
+        int val = stat.getValue();
+        return val;
     }
 
 }

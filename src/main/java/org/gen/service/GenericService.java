@@ -8,6 +8,7 @@ import org.neo4j.ogm.session.SessionFactory;
 import java.util.AbstractList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by Daniel on 05/05/2017.
@@ -29,6 +30,11 @@ public abstract class GenericService<T> implements Service<T> {
     }
 
     @Override
+    public Iterable<T> findAll(int depth) {
+        return session.loadAll(getEntityType(),depth);
+    }
+
+    @Override
     public T find(Long id) {
         return session.load(getEntityType(), id,DEPTH_ENTITY);
     }
@@ -44,6 +50,29 @@ public abstract class GenericService<T> implements Service<T> {
         return (T) aIterable.get(0);
 
     }
+
+    @Override
+    public T find(String uuid,int depth) {
+
+        Iterable<T> tIterable = session.query(getEntityType(),"Match p=(a{uuid:'"+uuid+"'})-[*]->() RETURN p",Collections.EMPTY_MAP);
+
+
+        List aIterable = Lists.newArrayList(tIterable);
+
+        return (T) aIterable.get(0);
+
+    }
+
+    @Override
+    public T find(UUID uuid, int depth) {
+
+        T node = session.load(getEntityType(), uuid, depth);
+
+
+        return node;
+
+    }
+
 
     @Override
     public void delete(Long id) {
